@@ -9,6 +9,7 @@ use App\Jobs\CreateThumbnailFromVideo;
 use App\Models\Channel;
 use App\Models\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class VideoController extends Controller
 {
@@ -26,13 +27,12 @@ class VideoController extends Controller
         $filename = basename($path);
 
         $video = $channel->videos()->create([
-            'title' => $request->title ?? 'untitled',
-            'description' => $request->description ?? 'none',
+            'title' => Str::beforeLast($request->file('video')->getClientOriginalName(), '.'),
+            'description' => null,
             'uid' => uniqid(true),
-            'visibility' => $request->visibility ?? 'private',
+            'visibility' => "private",
             'path' => $filename,
         ]);
-
 
         CreateThumbnailFromVideo::dispatch($video);
         ConvertVideoForStreaming::dispatch($video);
@@ -76,6 +76,9 @@ class VideoController extends Controller
     public function video($video)
     {
         $video = Video::where('uid',$video)->first();
+        $video->update([
+            'views'=>$video->views + 1,
+        ]);
 
         return view('pages.video-page',["video"=>$video]);
     }
