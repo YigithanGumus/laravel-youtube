@@ -10,6 +10,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "nwidart/laravel-modules": "^11.0",
+        "pbmedia/laravel-ffmpeg": "^8.7",
         "tightenco/ziggy": "^2.2"
     },
     "require-dev": {
