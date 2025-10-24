@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="max-w-lg m-auto">
-        <form class="mt-4" method="POST" action="{{ route('register.submit') }}">
+        <form class="mt-4" method="POST" action="{{ route('register.submit') }}" enctype="multipart/form-data">
             @csrf
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-medium mb-1">Adınız</label>
@@ -16,6 +16,24 @@
                 <label class="block text-gray-700 text-sm font-medium mb-1">Kanal Adınız</label>
                 <input v-model="form.channel_name" type="text" name="channel_name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="Kanal Adınızı girin">
                 <p v-if="errors.channel_name" class="text-red-500 text-sm mt-1">@{{ errors.channel_name[0] }}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-1">Profil Resmi</label>
+                <input v-model="form.profile_image" ref="profile_image" type="file" name="profile_image" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <p v-if="errors.profile_image" class="text-red-500 text-sm mt-1">@{{ errors.profile_image[0] }}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-1">Kanal Resmi</label>
+                <input v-model="form.channel_image" ref="channel_image" type="file" name="channel_image" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <p v-if="errors.channel_image" class="text-red-500 text-sm mt-1">@{{ errors.channel_image[0] }}</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-1">Banner Resmi</label>
+                <input v-model="form.banner" ref="banner" type="file" name="banner" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <p v-if="errors.banner" class="text-red-500 text-sm mt-1">@{{ errors.banner[0] }}</p>
             </div>
 
             <div class="mb-4">
@@ -64,6 +82,9 @@
                         password: '',
                         password_confirmation: '',
                         channel_name: '',
+                        profile_image: '',
+                        banner: '',
+                        channel_image: '',
                         terms: false,
                     },
                     errors: {},
@@ -76,13 +97,33 @@
                     this.errors = {};
 
                     try {
+                        const formData = new FormData();
+
+                        // Tüm alanları FormData'ya ekle
+                        formData.append('name', this.form.name);
+                        formData.append('email', this.form.email);
+                        formData.append('password', this.form.password);
+                        formData.append('password_confirmation', this.form.password_confirmation);
+                        formData.append('channel_name', this.form.channel_name);
+                        formData.append('terms', this.form.terms ? 1 : 0);
+
+                        // Dosyaları ekle
+                        if (this.$refs.profile_image?.files[0]) {
+                            formData.append('profile_image', this.$refs.profile_image.files[0]);
+                        }
+                        if (this.$refs.channel_image?.files[0]) {
+                            formData.append('channel_image', this.$refs.channel_image.files[0]);
+                        }
+                        if (this.$refs.banner?.files[0]) {
+                            formData.append('banner', this.$refs.banner.files[0]);
+                        }
+
                         const res = await fetch('{{ route('register.submit') }}', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             },
-                            body: JSON.stringify(this.form),
+                            body: formData
                         });
 
                         const data = await res.json();

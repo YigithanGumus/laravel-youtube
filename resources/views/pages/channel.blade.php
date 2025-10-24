@@ -8,9 +8,10 @@
         {{-- Kanal Banner --}}
         <div class="relative w-full h-52 bg-gray-200">
             @if($channel->banner)
-                <img src="{{ asset('storage/' . $channel->banner) }}"
+                <img src="{{ asset($channel->banner) }}"
                      alt="Channel Banner"
                      class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20"></div>
             @else
                 <div class="flex items-center justify-center h-full text-gray-400 text-sm">
                     Kanal kapağı yüklenmedi
@@ -19,39 +20,41 @@
         </div>
 
         {{-- Kanal Bilgileri --}}
-        <div class="max-w-6xl mx-auto px-4 mt-[-3rem] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div class="max-w-6xl mx-auto px-4 -mt-16 flex flex-col sm:flex-row sm:items-end justify-between gap-4 relative z-10">
             <div class="flex items-center gap-4">
-                <img src="{{ $channel->image ? asset('storage/' . $channel->image) : asset('images/default-avatar.png') }}"
+                <img src="{{ $channel->image ? asset($channel->image) : asset('images/default-avatar.png') }}"
                      alt="Kanal Profil"
                      class="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover">
 
                 <div>
                     <h1 class="text-2xl font-semibold">{{ $channel->name }}</h1>
                     <p class="text-gray-600 text-sm">{{ '@' . $channel->slug }}</p>
-                    <p class="text-gray-500 text-sm mt-1">{{ $channel->description ?? 'Kanal açıklaması bulunmuyor.' }}</p>
+                    <p class="text-gray-500 text-sm mt-1">
+                        {{ $channel->description ?? 'Kanal açıklaması bulunmuyor.' }}
+                    </p>
                 </div>
             </div>
 
             <div>
-                <button class="px-5 py-2.5 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition">
+                <button class="px-6 py-2.5 bg-red-600 text-white rounded-full font-medium hover:bg-red-700 transition shadow">
                     Abone Ol
                 </button>
             </div>
         </div>
 
         {{-- Sekmeler --}}
-        <div class="border-b border-gray-200 mt-8">
+        <div class="border-b border-gray-200 mt-10">
             <div class="max-w-6xl mx-auto px-4 flex gap-8 text-gray-600 font-medium">
-                <a href="#" class="py-3 border-b-2 border-gray-900 text-gray-900">Videolar</a>
-                <a href="#" class="py-3 border-b-2 border-transparent hover:border-gray-900 hover:text-gray-900 transition">Listeler</a>
-                <a href="#" class="py-3 border-b-2 border-transparent hover:border-gray-900 hover:text-gray-900 transition">Hakkında</a>
+                <a href="#" class="py-3 border-b-2 border-red-600 text-red-600 transition">Videolar</a>
+                <a href="#" class="py-3 border-b-2 border-transparent hover:border-red-600 hover:text-red-600 transition">Listeler</a>
+                <a href="#" class="py-3 border-b-2 border-transparent hover:border-red-600 hover:text-red-600 transition">Hakkında</a>
             </div>
         </div>
 
         {{-- Video Grid --}}
-        <div class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-12">
+        <div class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-16">
             @forelse($channel->videos as $video)
-                <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 relative group">
+                <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition transform hover:-translate-y-1 relative group">
 
                     {{-- Thumbnail --}}
                     <a href="{{ route('video.watch', [$video->uid]) }}" class="block relative">
@@ -70,7 +73,7 @@
 
                     {{-- Video Bilgileri --}}
                     <div class="p-3">
-                        <h2 class="text-base font-semibold line-clamp-2 hover:text-blue-600 transition">
+                        <h2 class="text-base font-semibold line-clamp-2 hover:text-red-600 transition-colors">
                             <a href="{{ route('video.watch', [$video->uid]) }}">{{ $video->title }}</a>
                         </h2>
                         <p class="text-sm text-gray-500 mt-1">{{ ucfirst($video->visibility) }}</p>
@@ -95,11 +98,11 @@
                             </a>
                         @endif
                     @endauth
-
                 </div>
             @empty
-                <div class="col-span-full text-center text-gray-500 mt-10">
-                    Bu kanalda henüz video yok.
+                <div class="col-span-full text-center py-16 text-gray-500">
+                    <p class="text-lg font-medium mb-2">Bu kanalda henüz video yok.</p>
+                    <p class="text-sm text-gray-400">Yeni videolar yüklendiğinde burada görünecek.</p>
                 </div>
             @endforelse
         </div>
