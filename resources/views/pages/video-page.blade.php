@@ -1,64 +1,76 @@
 @extends('layouts.app', [
-    'title' => $video->title . ' | LaravelTube'
+    'title' => $video->title . ' | YouTube'
 ])
 
 @section('content')
-    <div class="min-h-screen bg-gray-50 text-gray-900">
+    <div class="flex flex-col lg:flex-row gap-6 px-4 lg:px-6 py-4">
 
-        <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
-
-            {{-- === ANA VİDEO BÖLÜMÜ === --}}
-            <div class="flex-1 flex flex-col gap-6">
-
+            {{-- Sol Bölüm: Video ve Detayları --}}
+            <div class="flex-1">
                 {{-- Video Player --}}
-                <div class="w-full bg-black aspect-video rounded-2xl overflow-hidden shadow-2xl">
-                    <video controls autoplay class="w-full h-full object-cover rounded-2xl">
+                <div class="w-full bg-black aspect-video rounded-xl overflow-hidden">
+                    <video
+                        controls
+                        autoplay
+                        class="w-full h-full"
+                        poster="{{ Storage::url('videos/' . $video->uid . '/' . $video->thumbnail_image) }}"
+                    >
                         <source src="{{ Storage::url('videos/' . $video->uid . '/' . $video->processed_file) }}" type="video/mp4">
                         Tarayıcınız video etiketini desteklemiyor.
                     </video>
                 </div>
 
-                {{-- Video Başlık ve Bilgiler --}}
-                <div>
-                    <h1 class="text-2xl font-semibold mb-2">{{ $video->title }}</h1>
-                    <div class="flex flex-wrap items-center justify-between text-sm text-gray-600">
+                {{-- Video Başlık ve Detaylar --}}
+                <div class="mt-3">
+                    <h1 class="text-xl font-medium text-white">{{ $video->title }}</h1>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 gap-4">
+                        {{-- Sol: Kanal Bilgileri ve Abone Ol --}}
+                        <div class="flex items-center gap-4">
+                            <a href="{{ route('channel', $video->channel->slug) }}" class="flex items-center gap-3">
+                                <img
+                                    src="{{ $video->channel->image ? Storage::url($video->channel->image) : asset('images/default-avatar.png') }}"
+                                    alt="{{ $video->channel->name }}"
+                                    class="w-10 h-10 rounded-full"
+                                >
+                                <div>
+                                    <div class="font-medium text-white">{{ $video->channel->name }}</div>
+                                    <div class="text-sm text-gray-400">{{ number_format(rand(1000, 1000000)) }} abone</div>
+                                </div>
+                            </a>
+                            <button class="bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition">
+                                Abone ol
+                            </button>
+                        </div>
+
+                        {{-- Sağ: Etkileşim Butonları --}}
                         <div class="flex items-center gap-2">
-                            <span>{{ number_format($video->views) }} görüntüleme</span>
-                            <span>•</span>
-                            <span>{{ $video->created_at->diffForHumans() }}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            {{-- Beğen --}}
-                            <button
-                                class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full hover:bg-gray-200 transition group">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="w-5 h-5 text-gray-700 group-hover:text-blue-600 transition"
-                                     fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M2 21h4V9H2v12zM22 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32a1 1 0 0 0-.29-.7L13.17 2 7.59 7.59C7.22 7.95 7 8.45 7 9v10a2 2 0 0 0 2 2h7c.82 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" />
-                                </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-blue-600">Beğen</span>
+                            <div class="flex bg-[#272727] rounded-full">
+                                <button
+                                    class="flex items-center gap-2 px-4 py-2 hover:bg-[#3f3f3f] rounded-l-full transition"
+                                    @click="likeVideo({{ $video->id }})"
+                                >
+                                    <i class="far fa-thumbs-up"></i>
+                                    <span>{{ number_format($video->likes_count) }}</span>
+                                </button>
+                                <div class="w-px bg-[#4d4d4d]"></div>
+                                <button
+                                    class="flex items-center gap-2 px-4 py-2 hover:bg-[#3f3f3f] rounded-r-full transition"
+                                    @click="dislikeVideo({{ $video->id }})"
+                                >
+                                    <i class="far fa-thumbs-down"></i>
+                                </button>
+                            </div>
+
+                            <button class="flex items-center gap-2 px-4 py-2 bg-[#272727] hover:bg-[#3f3f3f] rounded-full transition">
+                                <i class="fas fa-share"></i>
+                                <span>Paylaş</span>
                             </button>
 
-                            {{-- Beğenme --}}
-                            <button
-                                class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full hover:bg-gray-200 transition group">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="w-5 h-5 text-gray-700 group-hover:text-red-600 transition"
-                                     fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M22 3h-4v12h4V3zM2 14c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .27.11.52.29.7l1.22 1.41 5.59-5.59c.37-.36.59-.86.59-1.41V7a2 2 0 0 0-2-2H8c-.82 0-1.54.5-1.84 1.22L3.14 13.27c-.09.23-.14.47-.14.73v0z" />
-                                </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-red-600">Beğenme</span>
-                            </button>
-
-                            {{-- Paylaş --}}
-                            <button
-                                class="px-4 py-2 bg-gray-100 rounded-full hover:bg-gray-200 transition text-sm text-gray-700">
-                                Paylaş
+                            <button class="p-2 hover:bg-[#272727] rounded-full transition">
+                                <i class="fas fa-ellipsis"></i>
                             </button>
                         </div>
-
                     </div>
                 </div>
 
@@ -82,77 +94,103 @@
                     <p>{{ $video->description }}</p>
                 </div>
 
-                {{-- === YORUMLAR === --}}
-                <div class="mt-8">
-                    <h2 class="text-xl font-semibold mb-4">Yorumlar</h2>
+                {{-- Video Açıklaması --}}
+                <div class="mt-4 p-3 bg-[#272727] rounded-xl">
+                    <div class="flex items-center gap-2 text-white text-sm mb-2">
+                        <span>{{ number_format($video->views) }} görüntüleme</span>
+                        <span>•</span>
+                        <span>{{ $video->created_at->diffForHumans() }}</span>
+                    </div>
+                    <p class="text-white whitespace-pre-line">{{ $video->description }}</p>
+                </div>
 
-                    {{-- Yorum Yazma Alanı --}}
-                    <div class="flex items-start gap-3 mb-6">
-                        <img src="{{ Storage::url(auth()->user()->profile_image ?? 'defaults/avatar.png') }}"
-                             class="w-10 h-10 rounded-full object-cover">
+                {{-- Yorumlar Bölümü --}}
+                <div class="mt-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <h3 class="text-white font-medium">Yorumlar</h3>
+                        <span class="text-gray-400">{{ number_format(rand(100, 1000)) }}</span>
+                    </div>
+
+                    {{-- Yorum Yazma --}}
+                    <div class="flex gap-3 mb-6">
+                        <img
+                            src="{{ auth()->check() ? (auth()->user()->profile_image ? Storage::url(auth()->user()->profile_image) : asset('images/default-avatar.png')) : asset('images/default-avatar.png') }}"
+                            class="w-10 h-10 rounded-full"
+                        >
                         <div class="flex-1">
-                            <textarea class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                      rows="2" placeholder="Yorum ekle..."></textarea>
-                            <div class="flex justify-end gap-2 mt-2">
-                                <button class="px-4 py-1 text-sm rounded-lg hover:bg-gray-200 transition">İptal</button>
-                                <button class="px-4 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">Paylaş</button>
-                            </div>
+                            <input
+                                type="text"
+                                placeholder="Yorum ekle..."
+                                class="w-full bg-transparent border-b border-[#272727] focus:border-white pb-1 outline-none text-white"
+                            >
                         </div>
                     </div>
 
-                    {{-- Örnek Yorum --}}
-                    <div class="flex items-start gap-3 mb-4">
-                        <img src="{{ asset('images/default-avatar.png') }}" class="w-10 h-10 rounded-full object-cover">
-                        <div class="flex-1">
-                            <p class="font-semibold text-gray-900">
-                                Ahmet Yılmaz
-                                <span class="text-gray-500 text-sm">• 2 gün önce</span>
-                            </p>
-                            <p class="text-gray-800 mt-1">Gerçekten çok bilgilendirici bir video olmuş, teşekkürler!</p>
-
-                            <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
-
-                                {{-- Beğen --}}
-                                <button class="flex items-center gap-1 group hover:text-blue-600 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 group-hover:text-blue-600 transition" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M2 21h4V9H2v12zM22 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32a1 1 0 0 0-.29-.7L13.17 2 7.59 7.59C7.22 7.95 7 8.45 7 9v10a2 2 0 0 0 2 2h7c.82 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
-                                    </svg>
-                                    <span class="text-gray-500 group-hover:text-blue-600">12</span>
-                                </button>
-
-                                {{-- Beğenme --}}
-                                <button class="flex items-center gap-1 group hover:text-red-600 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 group-hover:text-red-600 transition" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M22 3h-4v12h4V3zM2 14c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .27.11.52.29.7l1.22 1.41 5.59-5.59c.37-.36.59-.86.59-1.41V7a2 2 0 0 0-2-2H8c-.82 0-1.54.5-1.84 1.22L3.14 13.27c-.09.23-.14.47-.14.73v0z"/>
-                                    </svg>
-                                    <span class="text-gray-500 group-hover:text-red-600">1</span>
-                                </button>
-
-                                {{-- Yanıtla --}}
-                                <button class="hover:text-blue-600 transition">Yanıtla</button>
+                    {{-- Yorum Listesi --}}
+                    <div class="space-y-4">
+                        @for($i = 1; $i <= 5; $i++)
+                            <div class="flex gap-3">
+                                <img
+                                    src="https://picsum.photos/40/40?random={{ $i }}"
+                                    class="w-10 h-10 rounded-full"
+                                >
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <a href="#" class="text-white text-sm font-medium">Kullanıcı {{ $i }}</a>
+                                        <span class="text-gray-400 text-sm">{{ rand(1, 11) }} gün önce</span>
+                                    </div>
+                                    <p class="text-white text-sm mt-1">
+                                        Örnek yorum {{ $i }}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    </p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <button class="flex items-center gap-1 text-gray-400 hover:text-white">
+                                            <i class="far fa-thumbs-up text-sm"></i>
+                                            <span class="text-xs">{{ rand(1, 999) }}</span>
+                                        </button>
+                                        <button class="flex items-center gap-1 text-gray-400 hover:text-white">
+                                            <i class="far fa-thumbs-down text-sm"></i>
+                                        </button>
+                                        <button class="text-gray-400 hover:text-white text-sm">Yanıtla</button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        @endfor
                     </div>
                 </div>
             </div>
 
-            {{-- === ÖNERİLEN VİDEOLAR === --}}
-            <div class="w-full lg:w-80 flex flex-col gap-4">
-                <h2 class="font-semibold text-lg">Önerilen Videolar</h2>
-
-                {{-- Örnek Kartlar --}}
-                @foreach (range(1, 5) as $i)
-                    <div class="flex gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded-lg transition">
-                        <div class="w-40 h-24 bg-gray-300 rounded-lg overflow-hidden">
-                            <img src="https://picsum.photos/200/120?random={{ $i }}" class="w-full h-full object-cover">
+            {{-- Sağ Bölüm: Önerilen Videolar --}}
+            <div class="lg:w-[400px] space-y-4">
+                @for($i = 1; $i <= 10; $i++)
+                    <div class="flex gap-2 group cursor-pointer">
+                        {{-- Video Thumbnail --}}
+                        <div class="relative flex-shrink-0 w-40 sm:w-48 lg:w-40">
+                            <div class="aspect-video rounded-lg overflow-hidden">
+                                <img
+                                    src="https://picsum.photos/320/180?random={{ $i }}"
+                                    class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                                >
+                            </div>
+                            <div class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
+                                {{ rand(1, 59) }}:{{ str_pad(rand(0, 59), 2, '0', STR_PAD_LEFT) }}
+                            </div>
                         </div>
-                        <div class="flex-1 flex flex-col justify-between">
-                            <p class="text-sm font-semibold line-clamp-2">Önerilen Video Başlığı {{ $i }}</p>
-                            <p class="text-xs text-gray-500">Kanal Adı</p>
-                            <p class="text-xs text-gray-400">125K görüntüleme • 3 gün önce</p>
+
+                        {{-- Video Bilgileri --}}
+                        <div class="flex-1">
+                            <h3 class="text-white text-sm font-medium line-clamp-2 group-hover:text-blue-400">
+                                Önerilen Video Başlığı {{ $i }}
+                            </h3>
+                            <a href="#" class="block text-gray-400 text-xs mt-1 hover:text-white">
+                                Kanal Adı {{ $i }}
+                            </a>
+                            <div class="text-gray-400 text-xs mt-1">
+                                {{ number_format(rand(1000, 999999)) }} görüntüleme •
+                                {{ rand(1, 11) }} gün önce
+                            </div>
                         </div>
                     </div>
-                @endforeach
+                @endfor
             </div>
 
         </div>
