@@ -47,6 +47,7 @@ class UserRegisterRequest extends FormRequest
             'channel_name.required' => "Adınızı giriniz!",
             'channel_name.max' => "Adınızı maksimum 100 karakter girebilirsiniz!",
             'channel_name.min' => "Adınızı minimum 3 karakter girebilirsiniz!",
+            'channel_name.unique' => "Bu kanal adı mevcuttur!",
         ];
     }
 
