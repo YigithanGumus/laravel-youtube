@@ -42,33 +42,37 @@
                         <i class="fas fa-play-circle w-6 text-xl"></i>
                         <span class="ml-3 text-sm">Shorts</span>
                     </a>
-                    <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
-                        <i class="fas fa-tv w-6 text-xl"></i>
-                        <span class="ml-3 text-sm">Abonelikler</span>
-                    </a>
+                    @auth
+                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
+                            <i class="fas fa-tv w-6 text-xl"></i>
+                            <span class="ml-3 text-sm">Abonelikler</span>
+                        </a>
+                    @endauth
                 </div>
 
-                <hr class="my-4 border-gray-700">
+               @auth
+                    <hr class="my-4 border-gray-700">
 
-                <div class="space-y-1">
-                    <div class="px-4 py-2 text-sm text-gray-400">Kitaplık</div>
-                    <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
-                        <i class="fas fa-clock-rotate-left w-6 text-xl"></i>
-                        <span class="ml-3 text-sm">Geçmiş</span>
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
-                        <i class="fas fa-clock w-6 text-xl"></i>
-                        <span class="ml-3 text-sm">Daha Sonra İzle</span>
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
-                        <i class="fas fa-thumbs-up w-6 text-xl"></i>
-                        <span class="ml-3 text-sm">Beğendiğim Videolar</span>
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
-                        <i class="fas fa-download w-6 text-xl"></i>
-                        <span class="ml-3 text-sm">İndirilenler</span>
-                    </a>
-                </div>
+                    <div class="space-y-1">
+                        <div class="px-4 py-2 text-sm text-gray-400">Kitaplık</div>
+                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
+                            <i class="fas fa-clock-rotate-left w-6 text-xl"></i>
+                            <span class="ml-3 text-sm">Geçmiş</span>
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
+                            <i class="fas fa-clock w-6 text-xl"></i>
+                            <span class="ml-3 text-sm">Daha Sonra İzle</span>
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
+                            <i class="fas fa-thumbs-up w-6 text-xl"></i>
+                            <span class="ml-3 text-sm">Beğendiğim Videolar</span>
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 rounded-xl">
+                            <i class="fas fa-download w-6 text-xl"></i>
+                            <span class="ml-3 text-sm">İndirilenler</span>
+                        </a>
+                    </div>
+                @endauth
 
                 @auth
                 <hr class="my-4 border-gray-700">
@@ -311,14 +315,37 @@
         @yield('content')
     </main>
 
-    <footer class="bg-[#0f0f0f] p-6 mt-8 border-t border-gray-800 lg:pl-64">
+<!--    <footer class="bg-[#0f0f0f] p-6 mt-8 border-t border-gray-800 lg:pl-64">
         <div class="container mx-auto text-center text-gray-400">
             <p>© 2025 YouTube. Tüm hakları saklıdır.</p>
         </div>
-    </footer>
+    </footer>-->
 </div>
 
 <script>
+    const vueMixinFunctions = [
+        () => ({
+            data() {
+                return {
+                    showModal: false
+                }
+            },
+            components: {
+                Modal
+            },
+            watch: {
+                "appStore": function () {
+                    this.appStore.setAuth(@json(auth()->user()));
+                    this.appStore.setEnv({
+                        APP_NAME: '{{config('app.name')}}',
+                        APP_ENV: '{{env('APP_ENV')}}',
+                        MODULE_NAME: 'MAIN'
+                    })
+                }
+            }
+        })
+    ];
+
     document.addEventListener('DOMContentLoaded', () => {
         const userMenuButton = document.getElementById('user-menu-button');
         const userMenu = document.getElementById('user-menu');
