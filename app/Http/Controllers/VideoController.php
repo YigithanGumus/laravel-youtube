@@ -8,11 +8,14 @@ use App\Jobs\ConvertVideoForStreaming;
 use App\Jobs\CreateThumbnailFromVideo;
 use App\Models\Channel;
 use App\Models\Video;
+use App\Traits\ManageFiles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class VideoController extends Controller
 {
+    use ManageFiles;
+
     public function videoUploadPage()
     {
         return view('pages.upload-video');
@@ -20,26 +23,43 @@ class VideoController extends Controller
 
     public function videoUpload($channel, VideoUploadRequest $request)
     {
-        $channel = Channel::where('uid',$channel)->first();
+        $videoImagePath = null;
+
+        $channel = Channel::where('uid', $channel)->first();
 
         $videoFile = $request->file('video');
         $path = $videoFile->store('videos-temp');
         $filename = basename($path);
 
+        if ($request->hasFile('thumbnail_image')) {
+            $videoImagePath = $this->uploadFile(
+                $request->file('thumbnail_image'),
+                'uploads/thumbnail_images'
+            );
+        }
+
         $video = $channel->videos()->create([
-            'title' => Str::beforeLast($request->file('video')->getClientOriginalName(), '.'),
-            'description' => null,
+            'title' => $request->title ?? Str::beforeLast($request->file('video')->getClientOriginalName(), '.'),
+            'description' => $request->description ?? null,
             'uid' => uniqid(true),
-            'visibility' => "private",
+            'visibility' => "public",
             'path' => $filename,
+            'thumbnail_image'=>$videoImagePath ?? $filename,
         ]);
 
         CreateThumbnailFromVideo::dispatch($video);
-        ConvertVideoForStreaming::dispatch($video);
 
-        return redirect()->route('video.edit.page', [
-            'channel' => $channel->uid,
-            'video' => $video->uid,
+        if (!$request->hasFile('thumbnail_image')) {
+            ConvertVideoForStreaming::dispatch($video);
+
+
+            $video->update([
+                'thumbnail_image'=>$filename
+            ]);
+        }
+
+        return redirect()->route('channel', [
+            'channel' => $channel->slug,
         ]);
     }
 
