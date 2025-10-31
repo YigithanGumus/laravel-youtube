@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use Nwidart\Modules\Facades\Module;
@@ -25,6 +26,9 @@ Route::group(['middleware' => ['web','auth']], function (){
 
     Route::get('/videos/{channel}/{video}/edit', [VideoController::class,'videoEditPage'])->name('video.edit.page');
     Route::post('/videos/{channel}/{video}/edit', [VideoController::class,'videoEdit'])->name('video.edit');
+
+    Route::get('/profile/{id}',[UserController::class, 'updatePage'])->name('profile.page');
+    Route::post('/profile/{id}',[UserController::class, 'update'])->name('profile.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

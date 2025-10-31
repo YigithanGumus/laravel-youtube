@@ -3,7 +3,8 @@
 ])
 
 @section('content')
-    <div class="max-w-lg mx-auto mt-8 p-6 bg-[#282828] rounded-lg shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="max-w-lg mx-auto mt-8 p-6 bg-[#282828] rounded-lg shadow-lg">
         <h1 class="text-2xl font-semibold text-white mb-6 text-center">Hesap Oluştur</h1>
 
         <div v-if="globalError" class="mb-4 p-4 bg-red-500 bg-opacity-10 border border-red-500 rounded-lg">
@@ -161,6 +162,7 @@
         <div class="mt-6 text-center text-sm text-gray-400">
             Zaten bir hesabınız var mı?
             <a href="{{ route('login.page') }}" class="text-[#3ea6ff] hover:text-[#65b8ff] transition-colors duration-200">Giriş Yap</a>
+        </div>
         </div>
     </div>
 @endsection
