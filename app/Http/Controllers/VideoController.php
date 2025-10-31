@@ -23,7 +23,7 @@ class VideoController extends Controller
 
     public function videoUpload($channel, VideoUploadRequest $request)
     {
-        $videoImagePath = null;
+        $imagePath = null;
 
         $channel = Channel::where('uid', $channel)->first();
 
@@ -32,36 +32,30 @@ class VideoController extends Controller
         $filename = basename($path);
 
         if ($request->hasFile('thumbnail_image')) {
-            $videoImagePath = $this->uploadFile(
+            $imagePath = $this->uploadFile(
                 $request->file('thumbnail_image'),
                 'uploads/thumbnail_images'
             );
         }
 
         $video = $channel->videos()->create([
-            'title' => $request->title ?? Str::beforeLast($request->file('video')->getClientOriginalName(), '.'),
+            'title' => $request->title ?? Str::beforeLast($videoFile->getClientOriginalName(), '.'),
             'description' => $request->description ?? null,
             'uid' => uniqid(true),
             'visibility' => "public",
             'path' => $filename,
-            'thumbnail_image'=>$videoImagePath ?? $filename,
+            'image' => $imagePath,
         ]);
 
         CreateThumbnailFromVideo::dispatch($video);
+        ConvertVideoForStreaming::dispatch($video);
 
-        if (!$request->hasFile('thumbnail_image')) {
-            ConvertVideoForStreaming::dispatch($video);
-
-
-            $video->update([
-                'thumbnail_image'=>$filename
-            ]);
-        }
-
-        return redirect()->route('channel', [
-            'channel' => $channel->slug,
-        ]);
+        return response()->json([
+            'success' => true,
+            'redirect' => route('channel', ['channel' => $channel->slug]),
+        ], 201);
     }
+
 
     public function videoEditPage($channel, $video)
     {
@@ -90,12 +84,18 @@ class VideoController extends Controller
     {
         $channel = Channel::with('videos')->where('slug',$channel)->first();
 
-        return view('pages.channel',['channel'=>$channel]);
+        return view('pages.channel',['channel'=>$channel, 'views'=>count($channel->videos)]);
     }
 
     public function video($video)
     {
         $video = Video::where('uid',$video)->first();
+
+        if (!$video)
+        {
+            return view('pages.404');
+        }
+
         $video->update([
             'views'=>$video->views + 1,
         ]);
