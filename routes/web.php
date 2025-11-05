@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +21,13 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/channels/{channel}', [VideoController::class,'videos'])->name('channel');
 Route::get('/watch/{video}', [VideoController::class,'video'])->name('video.watch');
 
+Route::get('/api/count/{video_id}',[VideoController::class, 'countLikeDislike'])
+    ->name('count.like-dislike');
+
+Route::get('api/comments/{video}', [CommentController::class, 'index']);
+
+Route::post('videos/search', [SearchController::class, 'search'])->name('search.video');
+
 Route::group(['middleware' => ['web','auth']], function (){
 
     Route::get('/channel/{channel}/create',[VideoController::class,'videoUploadPage'])->name('video.page');
@@ -29,6 +38,30 @@ Route::group(['middleware' => ['web','auth']], function (){
 
     Route::get('/profile/{id}',[UserController::class, 'updatePage'])->name('profile.page');
     Route::post('/profile/{id}',[UserController::class, 'update'])->name('profile.update');
+
+    Route::post('api/channels/{channel_id}', [VideoController::class, 'subscribe'])
+        ->middleware('auth')
+        ->name('subscribe');
+
+    Route::get('/api/check-subscription/{channel_id}', [VideoController::class, 'checkSubscription'])
+        ->middleware('auth')
+        ->name('check.subscription');
+
+    Route::get('/api/check-like/{video_id}',[VideoController::class, 'checkLikeDislike'])
+        ->middleware('auth')
+        ->name('check.like');
+
+    Route::post('/api/videos/{video_id}/like',[VideoController::class, 'like'])
+        ->middleware('auth')
+        ->name('like');
+
+    Route::post('/api/videos/{video_id}/dislike',[VideoController::class, 'dislike'])
+        ->middleware('auth')
+        ->name('dislike');
+
+    Route::post('api/comment/{video}', [CommentController::class, 'store']);
+    Route::post('api/comment/{video}/reply', [CommentController::class, 'reply']);
+    Route::delete('api/comment/{video}', [CommentController::class, 'destroy']);
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
