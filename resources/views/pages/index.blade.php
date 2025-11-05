@@ -3,10 +3,10 @@
 ])
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 text-gray-900">
+    <div class="max-w-7xl mx-auto px-4 text-gray-900" style="margin-top: 30px;">
 
         {{-- Kategoriler --}}
-        <div class="flex overflow-x-auto space-x-2 pb-4 mb-8 thin-scrollbar">
+        <div class="flex overflow-x-auto space-x-2 pb-4 mb-8">
             @php
                 $categories = [
                     ['name' => 'Tümü', 'icon' => null],
@@ -103,7 +103,7 @@
         </div>
 
         {{-- Shorts --}}
-        <section class="mt-12 mb-12">
+<!--        <section class="mt-12 mb-12">
             <div class="flex items-center gap-2 mb-4">
                 <i class="fas fa-play-circle text-xl text-gray-800"></i>
                 <h2 class="text-xl font-medium text-gray-900">Shorts</h2>
@@ -126,10 +126,10 @@
                     </div>
                 @endfor
             </div>
-        </section>
+        </section>-->
 
         {{-- Canlı Yayınlar --}}
-        <section class="mb-12">
+<!--        <section class="mb-12">
             <h2 class="text-xl font-medium text-gray-900 mb-4">Canlı Yayınlar</h2>
 
             <div class="flex gap-4 overflow-x-auto thin-scrollbar">
@@ -168,7 +168,7 @@
                     </div>
                 @endfor
             </div>
-        </section>
+        </section>-->
     </div>
 
     <style>

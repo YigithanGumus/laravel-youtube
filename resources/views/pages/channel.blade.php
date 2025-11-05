@@ -68,8 +68,8 @@
 
                 <div class="flex items-center gap-3">
                    @auth
-                        <a href="{{ route('profile.page', Auth::id()) }}" class="bg-white text-black px-4 py-2 rounded-full font-medium border border-black hover:bg-black hover:text-white transition">
-                            Genel Ayarlar
+                        <a href="#" class="bg-white text-black px-4 py-2 rounded-full font-medium border border-black hover:bg-black hover:text-white transition">
+                            Kanal Ayarlar
                         </a>
                    @endauth
 

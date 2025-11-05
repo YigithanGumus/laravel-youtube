@@ -100,6 +100,7 @@
 
 @push('footer')
     <script>
+
         vueMixinFunctions.push(() => ({
             data() {
                 return {
