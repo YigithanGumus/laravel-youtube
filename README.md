@@ -108,3 +108,17 @@ resources/
 | **Channel Page** | Channel info + videos                        |
 | **Upload Page**  | Video upload with progress & background jobs |
 | **Search Page**  | Clean responsive white layout                |
+
+<img width="1917" height="900" alt="image" src="https://github.com/user-attachments/assets/3fab89e7-3552-4c0f-850e-45111031f3c1" />
+
+<img width="1895" height="901" alt="image" src="https://github.com/user-attachments/assets/fe4a7147-8950-4d11-a6fb-034ab7c5b703" />
+
+<img width="1897" height="905" alt="image" src="https://github.com/user-attachments/assets/1d0ac7ce-67c8-46be-a522-65bdddd929af" />
+
+<img width="1897" height="905" alt="image" src="https://github.com/user-attachments/assets/1ef0e339-03a2-4418-821c-7055b9c70cd6" />
+
+<img width="627" height="807" alt="image" src="https://github.com/user-attachments/assets/0ecad7fb-238d-483d-8a82-1d5ff877cb80" />
+
+<img width="452" height="816" alt="image" src="https://github.com/user-attachments/assets/f46fb38e-f75c-4879-8cd3-4738c2ffc98e" />
+
+<img width="1897" height="901" alt="image" src="https://github.com/user-attachments/assets/7df9fbf7-fce7-4cdc-a34a-5028430bbaa6" />
