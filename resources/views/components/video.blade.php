@@ -1,4 +1,4 @@
-<div @mouseenter="speechText(@json($video->title))" class="group bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div @mouseenter='speechText(@json($video->title))' class="group bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
 	{{-- Thumbnail --}}
 	<div class="relative aspect-video overflow-hidden">
 		<a href="{{ route('video.watch', $video->uid) }}" class="block w-full h-full">
