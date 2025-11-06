@@ -23,6 +23,7 @@
         "axios": "^1.6.4",
         "pinia": "^2.1.7",
         "sweetalert2": "^11.22.5",
+        "text-to-speech-js": "^1.1.11",
         "vue": "^3.4.31",
         "ziggy-js": "^2.2.1"
     }

@@ -20,6 +20,7 @@ class ConvertVideoForStreaming implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $video;
+	public $disk = 'videos-temp';
 
 
     /**
@@ -27,9 +28,10 @@ class ConvertVideoForStreaming implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Video $video)
+    public function __construct(Video $video, $disk = 'videos-temp')
     {
         $this->video = $video;
+		$this->disk = $disk;
     }
 
 
@@ -45,7 +47,7 @@ class ConvertVideoForStreaming implements ShouldQueue
         $high = (new X264('aac'))->setKiloBitrate(1000);
 
         try {
-            $media =  FFMpeg::fromDisk('videos-temp')
+            $media =  FFMpeg::fromDisk($this->disk)
                 ->open($this->video->path)
                 ->exportForHLS()
                 ->addFormat($low, function ($filters) {

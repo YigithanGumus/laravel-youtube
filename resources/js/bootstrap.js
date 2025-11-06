@@ -8,7 +8,7 @@ import initStore from './mixin/init-store.js';
 import { Confirm, Toast, Swal } from './lib/sweetalert/index.js';
 import { LaravelValidationMessageSolver } from './lib/laravel-validation-solver.js'
 import BlockUI from './lib/block-ui.js';
-
+import TextToSpeech from './lib/text-to-speech.js';
 const Modal = window.Modal = defineAsyncComponent(() => import('./components/Modal.vue'))
 
 window.SayHello = SayHello;
@@ -30,6 +30,8 @@ axios.interceptors.response.use(
     }
 );
 
+window.TextToSpeech =TextToSpeech;
+
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -44,6 +46,13 @@ window.app = createApp({
 window.app.use(createPinia())
 window.app.use(ZiggyVue, Ziggy);
 window.app.mixin(initStore);
+window.app.mixin({
+	methods: {
+		speechText(text) {
+			window.TextToSpeech(text);
+		}
+	}
+})
 
 window.app.directive('inline', el => {
     if (!el) return;

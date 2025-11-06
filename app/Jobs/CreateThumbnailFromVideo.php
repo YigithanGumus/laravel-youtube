@@ -15,15 +15,19 @@ class CreateThumbnailFromVideo implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $video;
+	public $disk = 'videos-temp';
+	public $video_path;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Video $video)
+    public function __construct(Video $video, $disk = 'videos-temp', $video_path = null)
     {
         $this->video = $video;
+		$this->disk = $disk;
+		$this->video_path = $video_path == null ? str_replace('storage/app/public/'.$disk.'/', '', $video->video_orginal_path) : $video_path;
     }
 
     /**
@@ -34,8 +38,8 @@ class CreateThumbnailFromVideo implements ShouldQueue
     public function handle()
     {
         $destination = '/' . $this->video->uid . '/' . $this->video->uid . '.png';
-        FFMpeg::fromDisk('videos-temp')
-            ->open($this->video->path)
+        FFMpeg::fromDisk($this->disk)
+            ->open($this->video_path)
             ->getFrameFromSeconds(2)
             ->export()
             ->toDisk('videos')

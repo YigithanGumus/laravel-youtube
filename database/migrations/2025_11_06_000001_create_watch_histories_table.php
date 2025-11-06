@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('channels', function (Blueprint $table) {
+        Schema::create('watch_histories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); // SQLite uyumlu
-            $table->string('name');
-            $table->string('slug');
-            $table->string('uid');
-            $table->text('description')->nullable();
-            $table->string('image')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('video_id');
+            $table->timestamp('watched_at')->useCurrent();
             $table->timestamps();
+            
+            $table->index(['user_id', 'video_id']);
+            $table->index('watched_at');
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('channels');
+        Schema::dropIfExists('watch_histories');
     }
 };

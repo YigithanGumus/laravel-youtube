@@ -1,7 +1,7 @@
 <?php
 
 return [
-
+	'when_upload_video_add_queue_for_streaming' => env('WHEN_UPLOAD_VIDEO_ADD_QUEUE_FOR_STREAMING', false),
     /*
     |--------------------------------------------------------------------------
     | Application Name

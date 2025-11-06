@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\VideoEditRequest;
 use App\Http\Requests\VideoUploadRequest;
+use App\Http\Resources\VideoResource;
 use App\Jobs\ConvertVideoForStreaming;
 use App\Jobs\CreateThumbnailFromVideo;
 use App\Models\Channel;
@@ -12,13 +13,16 @@ use App\Models\Dislike;
 use App\Models\Like;
 use App\Models\Subscribe;
 use App\Models\Video;
+use App\Models\WatchHistory;
+use App\Services\ImageService;
+use App\Services\VideoService;
 use App\Traits\ManageFiles;
 use http\Client\Curl\User;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Storage;
 class VideoController extends Controller
 {
     use ManageFiles;
@@ -30,36 +34,34 @@ class VideoController extends Controller
 
     public function videoUpload($channel, VideoUploadRequest $request)
     {
-        $imagePath = null;
+		$imagePath = null;
+		if ($request->hasFile('thumbnail_image')) {
 
-        $channel = Channel::where('uid', $channel)->first();
+			$imagePath = app(ImageService::class)
+			->uploadFile(
+				$request->file('thumbnail_image'),
+				'uploads/thumbnail_images'
+			);
+		}
 
-        $videoFile = $request->file('video');
-        $path = $videoFile->store('videos-temp');
-        $filename = basename($path);
+		$videoPath = app(VideoService::class)->uploadVideoToStorage($request->file('video'));
 
-        if ($request->hasFile('thumbnail_image')) {
-            $imagePath = $this->uploadFile(
-                $request->file('thumbnail_image'),
-                'uploads/thumbnail_images'
-            );
-        }
+		$video = app(VideoService::class)
+				->saveVideoToDatabase($channel, $videoPath, [
+						'title' => $request->title ?? Str::beforeLast($videoPath->getClientOriginalName(), '.'),
+						'description' => $request->description ?? null,
+						'visibility' => "public",
+						'image' => $imagePath,
+				]);
+		
+		if(!$imagePath){
+			app(VideoService::class)->generateThumbnail($video);
+		}
 
-        $video = $channel->videos()->create([
-            'title' => $request->title ?? Str::beforeLast($videoFile->getClientOriginalName(), '.'),
-            'description' => $request->description ?? null,
-            'uid' => uniqid(true),
-            'visibility' => "public",
-            'path' => $filename,
-            'image' => $imagePath,
-        ]);
 
-        CreateThumbnailFromVideo::dispatch($video);
-        ConvertVideoForStreaming::dispatch($video);
-
-        return response()->json([
+		return response()->json([
             'success' => true,
-            'redirect' => route('channel', ['channel' => $channel->slug]),
+            'redirect' => route('channel', ['channel' => $video->channel->slug]),
         ], 201);
     }
 
@@ -90,24 +92,30 @@ class VideoController extends Controller
     public function videos($channel)
     {
         $channel = Channel::with('videos')->where('slug',$channel)->first();
-
         return view('pages.channel',['channel'=>$channel, 'views'=>count($channel->videos)]);
     }
 
     public function video($video)
     {
-        $video = Video::where('uid',$video)->first();
+        $video = Video::where('uid',$video)->with('channel')->first();
 
-        $videos = Video::inRandomOrder()->get();
+		$video->update([
+			'views' => $video->views + 1,
+		]);
 
-        if (!$video)
-        {
-            return view('pages.404');
+        // İzleme geçmişi kaydı ekle (auth varsa)
+        if (Auth::check()) {
+            WatchHistory::create([
+                'user_id' => Auth::id(),
+                'video_id' => $video->id,
+                'watched_at' => now(),
+            ]);
         }
 
-        $video->update([
-            'views'=>$video->views + 1,
-        ]);
+        $videos = Video::orderBy('views', 'asc')->inRandomOrder()->limit(10)->whereNot('id', $video->id)->get();
+
+
+		
 
         return view('pages.video-page',["video"=>$video,"videos"=>$videos]);
     }

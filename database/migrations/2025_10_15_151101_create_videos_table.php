@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
-            $table->integer('channel_id');
+            $table->unsignedBigInteger('channel_id'); // SQLite için bigInteger kullan
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('duration')->nullable();
@@ -22,13 +22,17 @@ return new class extends Migration
             $table->string('thumbnail_image')->nullable();
             $table->text('path')->nullable();
             $table->string('processed_file')->nullable();
-            $table->enum('visibility', ['private', 'public', 'unlisted'])->default('private');
+            $table->string('visibility')->default('private'); // SQLite enum desteklemez
             $table->boolean('processed')->default(false);
             $table->boolean('allow_likes')->default(false);
             $table->boolean('allow_comments')->default(false);
-            $table->string('processing_percentage')->default(false);
-
+            $table->string('processing_percentage')->default('0');
             $table->timestamps();
+            $table->string('image')->nullable();
+            $table->integer('is_converting_for_streaming')->default(0);
+            $table->string('video_orginal_path')->nullable();
+            $table->string('video_orginal_url')->nullable();
+            $table->string('file_hash')->nullable()->index();
         });
     }
 

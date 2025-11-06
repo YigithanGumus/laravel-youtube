@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
 {
@@ -12,7 +13,21 @@ class Video extends Model
 
     protected $guarded = [];
 
+	protected $appends = ['video_url','thumbnail_url'];
 
+
+	public function getVideoUrlAttribute()
+	{
+		if ($this->is_converting_for_streaming) {
+			return '/videos/' . $this->uid . '/' . $this->processed_file;
+		} else {
+			return $this->video_orginal_url;
+		}
+	}
+
+	public function getThumbnailUrlAttribute(){
+		return Storage::disk('videos')->url($this->uid . '/' . $this->thumbnail_image);
+	}
     public function channel()
     {
         return $this->belongsTo(Channel::class);

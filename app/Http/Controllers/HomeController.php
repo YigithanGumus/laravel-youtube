@@ -2,16 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Channel;
 use App\Models\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $videos = Video::orderBy('created_at','desc')->get();
+		$channels = Cache::remember('channels_with_latest_video', 600, function () {
+			return Channel::whereHas('videos', function($query) {
+				$query->where('visibility', 'public')
+					  ->whereNotNull('thumbnail_image');
+			})
+			->with(['videos' => function($query) {
+				$query->where('visibility', 'public')
+					  ->whereNotNull('thumbnail_image')
+					  ->orderBy('created_at', 'desc')
+					  ->limit(1);
+			}])
+			->get()
+			->map(function($channel) {
+				$channel->latest_thumbnail = $channel->videos->first()?->thumbnail_image;
+				return $channel;
+			});
+		});
 
-        return view('pages.index',["videos"=>$videos]);
+        $videos = Video::orderBy('views','asc')->inRandomOrder()->limit(50)->get();
+
+        return view('pages.index',[
+			"videos" => $videos,
+			"channels" => $channels
+		]);
     }
 
     public function registerPage()

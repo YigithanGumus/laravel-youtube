@@ -13,9 +13,9 @@
                         controls
                         autoplay
                         class="w-full aspect-video"
-                        poster="{{ Storage::url('videos/' . $video->uid . '/' . $video->thumbnail_image) }}"
+                        poster="{{ $video->thumbnail }}"
                     >
-                        <source src="{{ Storage::url('videos/' . $video->uid . '/' . $video->processed_file) }}"
+                        <source src="{{ $video->video_url }}"
                                 type="video/mp4">
                         Tarayıcınız video etiketini desteklemiyor.
                     </video>
@@ -232,24 +232,27 @@
 
             {{-- SAĞ BÖLÜM: Önerilen Videolar --}}
             <aside class="lg:w-96 w-full space-y-3">
-                @foreach($videos as $vd)
-                    <div class="flex gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer transition">
-                        <div class="relative w-40 flex-shrink-0 rounded-md overflow-hidden">
-                            <img src="{{ asset($vd->image) }}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-2 py-0.5 rounded">
-                               {{ str_pad($vd->duration, 2, '0', STR_PAD_LEFT) }}
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-medium text-gray-900 line-clamp-2">
-                                {{ $vd->name }}
-                            </h3>
-                            <p class="text-gray-600 text-xs mt-1">{{ $vd->channel->name }}</p>
-                            <p class="text-gray-500 text-xs mt-1">
-                                {{ number_format($vd->views) }} görüntüleme • {{ $vd->created_at->diffForHumans() }}
-                            </p>
-                        </div>
-                    </div>
+                @foreach($videos as $video)
+				<x-video :video="$video" />
+					{{-- <a href="{{ route('video.watch', $video->uid) }}">
+						<div class="flex gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer transition">
+							<div class="relative w-40 flex-shrink-0 rounded-md overflow-hidden">
+								<img src="{{ $video->thumbnail_url }}" class="w-full h-full object-cover">
+								<div class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-2 py-0.5 rounded">
+								{{ str_pad($video->duration, 2, '0', STR_PAD_LEFT) }}
+								</div>
+							</div>
+							<div class="flex-1 min-w-0">
+								<h3 class="text-sm font-medium text-gray-900 line-clamp-2">
+									{{ $video->title }}
+								</h3>
+								<p class="text-gray-600 text-xs mt-1">{{ $video->channel->name }}</p>
+								<p class="text-gray-500 text-xs mt-1">
+									{{ number_format($video->views) }} görüntüleme • {{ $video->created_at->diffForHumans() }}
+								</p>
+							</div>
+						</div>
+					</a> --}}
                 @endforeach
             </aside>
         </div>

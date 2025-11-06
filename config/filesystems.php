@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk
@@ -29,7 +28,6 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -58,14 +56,25 @@ return [
 
         'videos-temp' => [
             'driver' => 'local',
-            'root' => storage_path('app/videos-temp'),
+            'root' => storage_path('app/public/videos-temp'),
+            'url' => env('APP_URL').'/storage/videos-temp',
+            'visibility' => 'public',
         ],
+
         'videos' => [
             'driver' => 'local',
             'root' => storage_path('app/public/videos'),
             'url' => env('APP_URL').'/storage/videos',
             'visibility' => 'public',
         ],
+
+		'manuel-videos' => [
+			'driver' => 'local',
+			'root' => storage_path('app/public/manuel-videos'),
+			'url' => env('APP_URL') . '/storage/manuel-videos',
+			'visibility' => 'public',
+		],
+
     ],
 
     /*
@@ -82,5 +91,4 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
     ],
-
 ];

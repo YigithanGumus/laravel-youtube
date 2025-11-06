@@ -22,7 +22,7 @@ class VideoUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'video' => 'required|file|mimetypes:video/mp4,video/avi,video/mov|max:1228800',
+            'video' => 'required|file',
             'title' => 'required|string|max:255|min:3',
             'description' => 'nullable|string',
             'visibility' => 'required|in:public,private,unlisted',
