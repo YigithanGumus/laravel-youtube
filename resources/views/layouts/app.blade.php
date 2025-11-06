@@ -8,7 +8,7 @@
     <title>{{$title ?? config('app.name')}}</title>
 
     @stack('header')
-    @vite(['resources/css/app.css', 'resources/css/sidebar.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Mobil menü animasyonları için özel stiller */
