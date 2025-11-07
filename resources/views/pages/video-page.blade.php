@@ -11,7 +11,7 @@
                 <div class="bg-black rounded-xl overflow-hidden shadow-md">
                     <video
                         controls
-                        autoplay
+                        {{-- autoplay --}}
                         class="w-full aspect-video"
                         poster="{{ $video->thumbnail }}"
                     >
@@ -257,12 +257,21 @@
             </aside>
         </div>
     </div>
-
+	<Modal size="lg" v-if="showModal">
+		<template v-slot:header> [İÇERİK BURAYA] </template>
+		<template v-slot:body> 
+			<iframe width="1200px" height="600px" src="/games/karsiya-gecirme/index.html" frameborder="0"></iframe>	
+		</template>
+	</Modal>
     @push('footer')
         <script>
             vueMixinFunctions.push(() => ({
+			components: {
+				Modal
+			},
                 data() {
                     return {
+						showModal: true,
                         isSubscribed: false,
                         subscriberCount: 0,
                         animating: false,
@@ -280,6 +289,8 @@
                     }
                 },
                 mounted() {
+					
+
                     const channelId = {{ $video->channel->id }};
                     const videoId = {{ $video->id }};
 
@@ -300,6 +311,16 @@
 
                     this.fetchComments(videoId);
                 },
+				created(){
+					const self = this;
+					setTimeout(() => {
+						window.addEventListener('message', function(event) {
+							setTimeout(() => {
+								self.showModal = false;
+							}, 2000);
+						});
+					}, 1000);
+				},
                 methods: {
                     async toggleSubscribe(channelId) {
                         try {
