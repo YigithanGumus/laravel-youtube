@@ -35,8 +35,8 @@ class ManuelVideoUpdater extends Command
 
         $disk = Storage::disk('manuel-videos');
         $files = $disk->allFiles();
-
-        $this->info('Toplam ' . count($files) . ' dosya bulundu.');
+		$totalFileCount = count($files);
+        $this->info('Toplam ' . $totalFileCount . ' dosya bulundu.');
 
         // Dosyaları klasörlere göre grupla
         $groupedFiles = collect($files)->groupBy(function ($file) {
@@ -69,7 +69,7 @@ class ManuelVideoUpdater extends Command
 			}
 
             // Bu klasördeki her dosya için işlem yap
-            foreach ($filesInFolder as $file) {
+            foreach ($filesInFolder as $index => $file) {
 				// Dosya uzantısını kontrol et
 				$extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 				$allowedExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm', 'm4v'];
@@ -78,17 +78,9 @@ class ManuelVideoUpdater extends Command
 					$this->warn('  ⊘ Video dosyası değil, es geçiliyor: ' . basename($file));
 					continue;
 				}
-				
-                $this->line('  - Video işleniyor: ' . basename($file));
-				
-				// $file zaten 'Niloya/1-bolu.mov' şeklinde tam path içeriyor
-				$fileExists = Storage::disk('manuel-videos')->exists($file);
-				$this->info('  Dosya var mı? ' . ($fileExists ? 'Evet' : 'Hayır'));
-				
-				if (!$fileExists) {
-					$this->error('  Dosya bulunamadı: ' . $file);
-					continue;
-				}
+
+                $this->line($index + 1 . '/' . $totalFileCount . '  - Video işleniyor: ' . basename($file));
+
 				
 				// Dosya hash'ini hesapla
 				$fullPath = Storage::disk('manuel-videos')->path($file);
@@ -96,8 +88,10 @@ class ManuelVideoUpdater extends Command
 				// Hash'e göre kontrol et
 				$existingVideo = Video::where('file_hash', $fileHash)->first();
 				if ($existingVideo) {
-					$this->info('  ⊘ Video zaten var (hash eşleşti), es geçiliyor...');
+					$this->info('👍 Video zaten var (hash eşleşti), es geçiliyor...');
 					continue;
+				}else{
+					$this->info('✨ Yeni video, veritabanına ekleniyor...');
 				}
 
 				// Dosyayı al veya path'i kullan
@@ -123,7 +117,7 @@ class ManuelVideoUpdater extends Command
 
 				app(VideoService::class)->generateThumbnail($video, 'manuel-videos');
 				
-				$this->info('  ✓ Video başarıyla eklendi');
+				$this->info('✅ Video başarıyla eklendi');
 			}
         }
 

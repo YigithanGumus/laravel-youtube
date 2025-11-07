@@ -22,8 +22,8 @@ class HomeController extends Controller
 					  ->orderBy('created_at', 'desc')
 					  ->limit(1);
 			}])
-			->get()
 			->inRandomOrder()
+			->get()
 			->map(function($channel) {
 				$channel->latest_thumbnail = $channel->videos->first()?->thumbnail_image;
 				return $channel;
