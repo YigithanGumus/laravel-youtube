@@ -257,7 +257,7 @@
             </aside>
         </div>
     </div>
-	<Modal size="lg" v-if="showModal">
+	<Modal size="lg" v-if="showModal" :hide-header="true" :allow-back-drop-click="false" :hide-footer="true">
 		<template v-slot:header> [İÇERİK BURAYA] </template>
 		<template v-slot:body> 
 			<iframe width="1200px" height="600px" src="/games/karsiya-gecirme/index.html" frameborder="0"></iframe>	
@@ -317,7 +317,7 @@
 						window.addEventListener('message', function(event) {
 							setTimeout(() => {
 								self.showModal = false;
-							}, 2000);
+							}, 1800);
 						});
 					}, 1000);
 				},
