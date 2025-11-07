@@ -119,6 +119,63 @@
             transition: transform 0.3s ease, filter 0.3s ease;
             user-select: none;
             -webkit-user-select: none;
+            z-index: 10;
+        }
+        
+        .animal.dragging {
+            cursor: grabbing;
+            z-index: 1000;
+            transition: none;
+            transform: scale(1.3);
+            animation: bounce 0.5s ease-in-out infinite;
+        }
+        
+        .animal.dragging::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, 
+                #ff0000, #ff7f00, #ffff00, #00ff00, 
+                #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            border-radius: 50%;
+            filter: blur(15px);
+            opacity: 0.7;
+            z-index: -1;
+            animation: rainbowGlow 1.5s linear infinite;
+        }
+        
+        .animal.dragging::after {
+            content: '✨';
+            position: absolute;
+            font-size: 40px;
+            top: -20px;
+            right: -20px;
+            animation: sparkle 1s ease-in-out infinite;
+        }
+        
+        @keyframes rainbowGlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1.3) translateY(0); }
+            50% { transform: scale(1.3) translateY(-10px); }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { 
+                opacity: 1; 
+                transform: rotate(0deg) scale(1);
+            }
+            50% { 
+                opacity: 0.5; 
+                transform: rotate(180deg) scale(1.5);
+            }
         }
 
         .animal:hover {
@@ -305,7 +362,7 @@
 </head>
 <body>
     <!-- Başlangıç Modal -->
-    <div id="start-modal">
+    <div id="start-modal" >
         <div class="modal-content">
             <h1>🎮 Hayvanları Karşıya Geçir! 🐑</h1>
             <p>Söylenen hayvanı nehrin karşısına sürükle<br>ve İngilizce hayvan isimlerini öğren!</p>
@@ -314,7 +371,7 @@
     </div>
 
     <div id="game-container">
-        <div id="instruction">Hadi <span id="target-word"></span>'i karşıya geçir!</div>
+        <div id="instruction" style="opacity: 0.4;">Hadi <span id="target-word"></span>'i karşıya geçir!</div>
         <button id="speaker-btn" onclick="speakInstruction()">🔊</button>
         
         <div class="ground ground-left">
@@ -545,68 +602,100 @@
                 div.style.left = '50px';
                 div.style.top = yPos + '%';
                 
-                div.addEventListener('mousedown', startDrag);
-                div.addEventListener('touchstart', startDrag);
+                // Hayvanı tıklama ile seç ve sürükle
+                div.addEventListener('click', handleAnimalClick);
                 
                 container.appendChild(div);
             });
         }
 
-        function startDrag(e) {
-            e.preventDefault();
-            draggedAnimal = e.target.closest('.animal');
-            
-            // Seçili sınıfı ekle
-            draggedAnimal.classList.add('selected');
-            
-            const rect = draggedAnimal.getBoundingClientRect();
-            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-            
-            offsetX = clientX - rect.left;
-            offsetY = clientY - rect.top;
-            
-            draggedAnimal.style.zIndex = 1000;
-            
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('touchend', stopDrag);
-        }
+        let selectedAnimal = null;
+        let isDragging = false;
+        let initialX = 0;
+        let initialY = 0;
 
-        function drag(e) {
-            if (!draggedAnimal) return;
+        function handleAnimalClick(e) {
+            e.stopPropagation();
+            const clickedAnimal = e.target.closest('.animal');
             
-            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-            
-            draggedAnimal.style.left = (clientX - offsetX) + 'px';
-            draggedAnimal.style.top = (clientY - offsetY) + 'px';
-        }
-
-        function stopDrag(e) {
-            if (!draggedAnimal) return;
-            
-            const rect = draggedAnimal.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            
-            // Sağ tarafa geçti mi kontrol et
-            if (centerX > window.innerWidth * 0.6) {
-                checkAnswer(draggedAnimal.dataset.name);
-            } else {
-                // Geri döndür
-                draggedAnimal.style.left = '50px';
+            // Eğer başka bir hayvan sürükleniyorsa, onu bırak
+            if (selectedAnimal && selectedAnimal !== clickedAnimal) {
+                selectedAnimal.classList.remove('dragging');
             }
             
-            // Seçili sınıfı kaldır
-            draggedAnimal.classList.remove('selected');
-            draggedAnimal.style.zIndex = 1;
-            draggedAnimal = null;
+            // Eğer aynı hayvana tekrar tıklanırsa, bırak ve kontrol et
+            if (selectedAnimal === clickedAnimal && isDragging) {
+                dropAnimal(clickedAnimal);
+                return;
+            }
             
-            document.removeEventListener('mousemove', drag);
-            document.removeEventListener('touchmove', drag);
-            document.removeEventListener('mouseup', stopDrag);
-            document.removeEventListener('touchend', stopDrag);
+            // Yeni hayvanı seç ve sürüklemeyi başlat
+            selectedAnimal = clickedAnimal;
+            isDragging = true;
+            selectedAnimal.classList.add('dragging');
+            
+            // Başlangıç pozisyonunu kaydet
+            const rect = selectedAnimal.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+        }
+
+        function dropAnimal(animal) {
+            isDragging = false;
+            animal.classList.remove('dragging');
+            
+            // Hayvanın pozisyonunu kontrol et
+            const rect = animal.getBoundingClientRect();
+            const rightGround = document.querySelector('.ground-right');
+            const rightRect = rightGround.getBoundingClientRect();
+            
+            // Sağ tarafta mı kontrol et
+            if (rect.left > rightRect.left) {
+                checkAnswer(animal.dataset.name);
+            }
+            
+            selectedAnimal = null;
+        }
+
+        // Fare hareketi ile hayvanı sürükle
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging && selectedAnimal) {
+                const x = e.clientX - 60; // Hayvan genişliğinin yarısı
+                const y = e.clientY - 60; // Hayvan yüksekliğinin yarısı
+                
+                selectedAnimal.style.left = x + 'px';
+                selectedAnimal.style.top = y + 'px';
+            }
+        });
+
+        // Dokümanın herhangi bir yerine tıklanırsa hayvanı bırak
+        document.addEventListener('click', function(e) {
+            if (isDragging && selectedAnimal && !e.target.closest('.animal')) {
+                dropAnimal(selectedAnimal);
+            }
+        });
+
+        // Touch events için destek
+        document.addEventListener('touchmove', function(e) {
+            if (isDragging && selectedAnimal) {
+                const touch = e.touches[0];
+                const x = touch.clientX - 60;
+                const y = touch.clientY - 60;
+                
+                selectedAnimal.style.left = x + 'px';
+                selectedAnimal.style.top = y + 'px';
+            }
+        }, { passive: false });
+
+        // Sağ tarafa tıklama için event listener'ı kaldır
+        function setupRightSideClick() {
+            // Bu fonksiyon artık gerekli değil
+        }
+
+        // startGameFromModal fonksiyonunu güncelle
+        function startGameFromModal() {
+            document.getElementById('start-modal').classList.add('hidden');
+            startGame();
         }
 
         function checkAnswer(animalName) {
@@ -629,7 +718,7 @@
 
 				window.parent.postMessage({
 					status: 'success'
-				});
+				}, '*');
 
             } else {
                 resultText.textContent = '😊 Tekrar dene!';
@@ -653,13 +742,6 @@
         function speak(speechFile) {
             const audio = new Audio(speechFile);
             audio.play();
-        }
-
-        function startGameFromModal() {
-            // Modal'ı gizle
-            document.getElementById('start-modal').classList.add('hidden');
-            // Oyunu başlat
-            startGame();
         }
 
         // Sayfa yüklendiğinde verileri yükle
