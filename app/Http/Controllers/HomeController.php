@@ -23,6 +23,7 @@ class HomeController extends Controller
 					  ->limit(1);
 			}])
 			->get()
+			->inRandomOrder()
 			->map(function($channel) {
 				$channel->latest_thumbnail = $channel->videos->first()?->thumbnail_image;
 				return $channel;
